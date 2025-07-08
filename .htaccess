@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Serve public css/js/images without needing /public in the URL
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(css|js|images|fonts)/(.*)$ public/$1/$2 [L]
+
+    # Laravel routing fallback
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
