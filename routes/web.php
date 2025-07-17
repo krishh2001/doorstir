@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\AdminNotificationController;
+use App\Http\Controllers\Admin\StreamNotificationController;
 use App\Http\Controllers\Api\ForgotPasswordController;
 
 Route::view('/forgot-password', 'auth.forgot-password')->name('forgot.password');
@@ -19,7 +20,7 @@ Route::post('/verify-otp', [ForgotPasswordController::class, 'showResetForm'])->
 
 
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('/')->name('admin.')->group(function () {
 
     // Login Routes
     Route::get('/', [AdminAuthController::class, 'showLoginForm'])->name('login');
@@ -100,14 +101,25 @@ Route::delete('/{provider}', [ServiceProviderController::class, 'destroy'])->nam
     Route::post('/', [CategoryController::class, 'store'])->name('store');
     Route::put('/{id}', [CategoryController::class, 'update'])->name('update');
     Route::delete('/{id}', [CategoryController::class, 'destroy'])->name('destroy');
+
+
 });
 
 
 
 
         Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
-Route::get('/notifications/read/{id}', [AdminNotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
-Route::get('/notifications/mark-all', [AdminNotificationController::class, 'markAllAsRead'])->name('notifications.markAll');
+        Route::get('/notifications/read/{id}', [AdminNotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+        Route::get('/notifications/mark-all', [AdminNotificationController::class, 'markAllAsRead'])->name('notifications.markAll');
 
+
+    Route::get('/streamList', [StreamNotificationController::class, 'streamList'])->name('streamList');
+    Route::get('/joinMeeting/{url?}', [StreamNotificationController::class, 'joinMeeting'])->name('joinMeeting');
+
+    Route::get('/stream-notifications', [StreamNotificationController::class, 'index']);
+    Route::post('/stream-notifications', [StreamNotificationController::class, 'store'])->name('stream.create');
+    Route::get('/stream-notifications/{id}', [StreamNotificationController::class, 'show']);
+    Route::put('/stream-notifications/{id}', [StreamNotificationController::class, 'update']);
+    Route::delete('/stream-notifications/{id}', [StreamNotificationController::class, 'destroy']);
     });
 });

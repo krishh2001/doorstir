@@ -47,6 +47,12 @@
                     <i class="fas fa-video"></i> Stream Order
                 </a>
             </li>
+            <li class="{{ request()->is('admin/streamList*') ? 'active' : '' }}">
+                <a href="{{ route('admin.streamList') }}">
+                    <i class="fas fa-video"></i> Stream
+                </a>
+            </li>
+
             <li class="{{ request()->is('admin/categories*') ? 'active' : '' }}">
                 <a href="{{ route('admin.categories.index') }}">
                     <i class="fas fa-layer-group"></i> Categories

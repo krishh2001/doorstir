@@ -36,44 +36,31 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @foreach($streamOrder as $row)
                     <tr>
                         <td>1</td>
-                        <td>#ORD12345</td>
-                        <td>Ravi Sharma</td>
-                        <td>AC Repair</td>
-                        <td>2025-06-25</td>
-                        <td><span class="badge badge-success">Completed</span></td>
+                        <td>{{$row->order_id}}</td>
+                        <td>{{$row->user->name}}</td>
+                        <td>{{$row->service->name}}</td>
+                        <td>{{$row->date_time}}</td>
+
                         <td>
-                            <button class="btn-small btn-reply" onclick="openModal()">Create Stream</button>
-                            <button class="btn-small btnn-delete" onclick="openSliderModal('delete')">Delete</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>#ORD12346</td>
-                        <td>Anjali Mehra</td>
-                        <td>Electrician</td>
-                        <td>2025-06-27</td>
-                        <td><span class="badge badge-info">Pending</span></td>
-                        <td>
-                            <button class="btn-small btn-reply" onclick="openModal()">Create Stream</button>
-                            <button class="btn-small btnn-delete" onclick="openSliderModal('delete')">Delete</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>#ORD12346</td>
-                        <td>Anjali Mehra</td>
-                        <td>Electrician</td>
-                        <td>2025-06-27</td>
-                        <td>
+                            @if($row->status =='complete')
+                            <span class="badge badge-success">Completed</span>
+                            @elseif($row->status =='upcoming')
                             <span class="badge upcomming">Upcoming</span>
+                            @else
+                            <span class="badge badge-info">pending</span>
+                            @endif
                         </td>
                         <td>
-                            <button class="btn-small btn-reply" onclick="openModal()">Create Stream</button>
+                            <button class="btn-small btn-reply" data-id="{{ $row->id }}" data-user-id="{{ $row->user_id }}" data-user-name="{{ $row->user->name }}" data-service="{{ $row->service_id }}" data-service-name="{{ $row->service->name }}" data-date-time="{{ $row->date_time ?? '' }}" onclick="openModal(this)">Create Stream</button>
+                            <!-- <button class="btn-small btn-reply" data_id="{{$row->id}}" data_user_id="{{$row->user_id}}" data_user_name="{{$row->user->name}}" data_service="{{$row->service_id}}" data_service_name="{{$row->service->name}}"  onclick="openModal()">Create Stream</button> -->
                             <button class="btn-small btnn-delete" onclick="openSliderModal('delete')">Delete</button>
                         </td>
                     </tr>
+                    @endforeach
+                   
                 </tbody>
             </table>
         </div>
@@ -97,25 +84,35 @@
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal()">×</button>
             <h3>Send Stream Details</h3>
-            <form id="streamForm">
+            <form action="{{route('admin.stream.create')}}" method="POST">
+               
+            @csrf
                 <div class="form-group">
                     <label>User ID</label>
-                    <input type="text" id="userIdField" readonly>
+                    <input type="text" id="user_name">
+                    <input type="hidden" id="userIdField" name="user_id" readonly>
                 </div>
 
                 <div class="form-group">
                     <label>Service</label>
-                    <input type="text" id="serviceField" readonly>
+                    <input type="text" id="servicename" readonly>
+                    <input type="hidden" id="serviceField" name="service_id"  readonly>
                 </div>
 
                 <div class="form-group">
                     <label>Provider Name</label>
-                    <input type="text" id="providerField" placeholder="Enter provider name">
-                </div>
+                    <select name="provider_id" id="providerField">
+                        @foreach($ServiceProvider as $row)
+                            <option value="{{$row->id}}">{{$row->name}}</option>
+                        @endforeach
+                    </select>
+                     </div>
 
                 <div class="form-group">
                     <label>Date & Time</label>
-                    <input type="text" id="datetimeField" readonly>
+                    <!-- <input type="date"  name="datetime"> -->
+                    <input type="datetime-local" id="datetime" name="date_time" required>
+
                 </div>
 
                 <div class="form-group">
@@ -131,18 +128,32 @@
 
                 <div class="form-group hidden" id="streamLinkGroup">
                     <label>Stream Link</label>
-                    <input type="url" id="streamLinkInput" placeholder="Paste the meeting link here">
+                    <input type="url" id="streamLinkInput" name="agora_way_url" placeholder="Paste the meeting link here">
                 </div>
 
                 <button class="btn-small btn-reply" type="submit">Send</button>
             </form>
         </div>
+
+        <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js"></script>
+<script>
+  const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+
+  client.init("cb38de2959ec4f0d8aa312cd427dabf3", () => {
+    console.log("AgoraRTC client initialized");
+    // join, create stream, publish, etc.
+  });
+</script>
+
+
     </div>
 
-    <script>
+    <!-- <script>
         function openModal(userId = '', service = '', dateTime = '') {
-            document.getElementById('userIdField').value = userId;
-            document.getElementById('serviceField').value = service;
+            document.getElementById('userIdField').value = user_id;
+            // document.getElementById('userIdField').value = user_name;
+            document.getElementById('serviceField').value = service_id;
+            // document.getElementById('serviceField').value = service_name;
             document.getElementById('datetimeField').value = dateTime;
             document.getElementById('replyModal').style.display = 'flex';
         }
@@ -155,5 +166,35 @@
             const selected = document.getElementById('streamWay').value;
             document.getElementById('streamLinkGroup').classList.toggle('hidden', !selected);
         }
-    </script>
+    </script> -->
+
+    <script>
+    function openModal(button) {
+        const userId = button.getAttribute('data-user-id');
+        const username = button.getAttribute('data-user-name');
+        const serviceId = button.getAttribute('data-service');
+        const servicename = button.getAttribute('data-service-name');
+        // const dateTime = button.getAttribute('data-date-time');
+
+        // Populate modal fields
+        document.getElementById('userIdField').value = userId;
+        document.getElementById('user_name').value = username;
+        document.getElementById('serviceField').value = serviceId;
+        document.getElementById('servicename').value = servicename;
+        // document.getElementById('datetimeField').value = dateTime;
+
+        // Show the modal
+        document.getElementById('replyModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('replyModal').style.display = 'none';
+    }
+
+    function toggleStreamLinkInput() {
+        const selected = document.getElementById('streamWay').value;
+        document.getElementById('streamLinkGroup').classList.toggle('hidden', !selected);
+    }
+</script>
+
 @endsection

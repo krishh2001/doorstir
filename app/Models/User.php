@@ -45,4 +45,8 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function getUserMeetingInfo(){
+        return $this->hasMany(UserMeeting::class, 'user_id','id');
+    }
 }
